@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RailSync | Login</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #071629, #102e4d, #1b5275);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .background-circle {
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background: rgba(91, 184, 255, 0.08);
+            filter: blur(5px);
+        }
+
+        .circle-one {
+            top: -120px;
+            left: -100px;
+        }
+
+        .circle-two {
+            bottom: -150px;
+            right: -100px;
+        }
+
+        .login-container {
+            display: flex;
+            width: 850px;
+            max-width: 100%;
+            min-height: 510px;
+            background: white;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+            position: relative;
+            z-index: 1;
+        }
+
+        .left-panel {
+            width: 45%;
+            background: linear-gradient(145deg, #102d4a, #17628b);
+            color: white;
+            padding: 55px 35px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .logo span {
+            color: #65d5ff;
+        }
+
+        .tagline {
+            color: #c8e9fa;
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 45px;
+        }
+
+        .left-panel h2 {
+            font-size: 28px;
+            line-height: 1.4;
+            margin-bottom: 18px;
+        }
+
+        .left-panel p {
+            color: #d4e7f4;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .features {
+            margin-top: 35px;
+        }
+
+        .feature {
+            margin: 15px 0;
+            color: #e7f6ff;
+            font-size: 14px;
+        }
+
+        .right-panel {
+            width: 55%;
+            padding: 55px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .welcome {
+            font-size: 29px;
+            color: #102d4a;
+            font-weight: 750;
+            margin-bottom: 8px;
+        }
+
+        .description {
+            color: #8492a3;
+            font-size: 14px;
+            margin-bottom: 35px;
+        }
+
+        label {
+            display: block;
+            color: #34465a;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 9px;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        .input-box {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 15px;
+            border: 1px solid #dce3eb;
+            border-radius: 9px;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+            background: #f9fbfd;
+        }
+
+        input:focus {
+            border-color: #1682bd;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(22, 130, 189, 0.1);
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 12px;
+            color: #17628b;
+            font-weight: 600;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 9px;
+            background: linear-gradient(135deg, #123d61, #1682bd);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(22, 130, 189, 0.3);
+        }
+
+        .message {
+            text-align: center;
+            color: #d93025;
+            background: #fff0ef;
+            padding: 11px;
+            border-radius: 8px;
+            margin-top: 18px;
+            font-size: 13px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #9aa5b1;
+        }
+
+        @media(max-width: 700px) {
+            .login-container {
+                flex-direction: column;
+                width: 430px;
+            }
+
+            .left-panel {
+                width: 100%;
+                padding: 30px;
+            }
+
+            .left-panel h2 {
+                font-size: 23px;
+            }
+
+            .tagline {
+                margin-bottom: 20px;
+            }
+
+            .features {
+                display: none;
+            }
+
+            .right-panel {
+                width: 100%;
+                padding: 35px 28px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="background-circle circle-one"></div>
+    <div class="background-circle circle-two"></div>
+
+    <div class="login-container">
+
+        <div class="left-panel">
+
+            <div class="logo">Rail<span>Sync</span></div>
+
+            <div class="tagline">Smart Railway Management</div>
+
+            <h2>Travel Smarter.<br>Manage Better.</h2>
+
+            <p>
+                Your intelligent railway management platform
+                for seamless bookings, secure access and
+                smarter passenger experiences.
+            </p>
+
+            <div class="features">
+                <div class="feature">✦ Smart Train Management</div>
+                <div class="feature">✦ Secure QR Ticket Verification</div>
+                <div class="feature">✦ Real-Time Passenger Access Logs</div>
+                <div class="feature">✦ Integrated Railway Operations</div>
+            </div>
+
+        </div>
+
+        <div class="right-panel">
+
+            <h1 class="welcome">Welcome Back!</h1>
+
+            <p class="description">
+                Sign in to continue to your RailSync account.
+            </p>
+
+            <form method="POST">
+
+                <div class="input-group">
+
+                    <label for="email">Email Address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email address"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+                <div class="input-group">
+
+                    <label for="password">Password</label>
+
+                    <div class="input-box">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <span
+                            class="toggle-password"
+                            onclick="togglePassword()"
+                            id="toggleText">
+                            SHOW
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <button type="submit" class="login-button">
+                    Login to RailSync →
+                </button>
+
+            </form>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <p class="message">{{ message }}</p>
+                {% endfor %}
+            {% endwith %}
+
+            <div class="footer">
+                © 2026 RailSync | Smart Railway Management System
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function togglePassword() {
+
+            const password = document.getElementById("password");
+            const toggleText = document.getElementById("toggleText");
+
+            if (password.type === "password") {
+                password.type = "text";
+                toggleText.innerText = "HIDE";
+            } else {
+                password.type = "password";
+                toggleText.innerText = "SHOW";
+            }
+
+        }
+    </script>
+
+</body>
+</html>

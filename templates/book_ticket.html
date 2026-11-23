@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Tickets | RailSync</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #243b55;
+        }
+
+        header {
+            background: linear-gradient(120deg, #102d4a, #17628b);
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 span {
+            color: #65d5ff;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,.15);
+            padding: 10px 17px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 38px 15px 75px;
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            color: #dcefff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: -45px auto 40px;
+            padding: 0 18px;
+            position: relative;
+        }
+
+        .card {
+            background: white;
+            padding: 32px;
+            border-radius: 17px;
+            margin-bottom: 23px;
+            box-shadow: 0 8px 25px rgba(0,0,0,.07);
+        }
+
+        .card h2 {
+            color: #123d61;
+            font-size: 21px;
+            margin-bottom: 24px;
+            padding-bottom: 13px;
+            border-bottom: 1px solid #e8edf2;
+        }
+
+        .welcome {
+            margin-bottom: 20px;
+            color: #64748b;
+        }
+
+        .welcome strong {
+            color: #17628b;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 9px;
+            font-size: 14px;
+            font-weight: 650;
+            color: #34465a;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #dce3eb;
+            border-radius: 8px;
+            background: #f9fbfd;
+            font-size: 14px;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: #1682bd;
+            box-shadow: 0 0 0 3px rgba(22,130,189,.1);
+        }
+
+        .passenger {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 16px;
+            background: #f6f9fc;
+            border-radius: 10px;
+        }
+
+        .passenger input,
+        .passenger select {
+            min-width: 0;
+        }
+
+        .remove-btn {
+            border: none;
+            background: #ffe8e8;
+            color: #d93025;
+            padding: 11px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: #e5f3fc;
+            color: #17628b;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-weight: 650;
+            cursor: pointer;
+        }
+
+        .add-btn:hover {
+            background: #d3ebfa;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: .3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(22,130,189,.25);
+        }
+
+        .back {
+            display: inline-block;
+            color: #17628b;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8995a5;
+            font-size: 13px;
+        }
+
+        @media(max-width: 650px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .passenger {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .passenger input:first-child {
+                grid-column: span 2;
+            }
+
+            .card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Rail<span>Sync</span></h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<section class="hero">
+    <h1>🎫 Book Your Journey</h1>
+    <p>Your next destination is just a few clicks away.</p>
+</section>
+
+<div class="container">
+
+    <p class="welcome">
+        Welcome, <strong>{{ current_user.full_name }}</strong>!
+    </p>
+
+    <form method="POST" action="{{ url_for('passenger.create_booking') }}">
+
+        <div class="card">
+
+            <h2>🚆 Journey Details</h2>
+
+            <div class="grid">
+
+                <div class="field">
+                    <label>Select Train</label>
+                    <select name="schedule_id" id="schedule" required>
+                        <option value="">Select Train</option>
+
+                        {% for s in schedules %}
+                        <option value="{{ s.schedule_id }}">
+                            {{ s.train_number }} - {{ s.train_name }}
+                            ({{ s.journey_date }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Coach Type</label>
+                    <select name="coach_type" required>
+                        <option value="SLEEPER">Sleeper</option>
+                        <option value="AC">AC</option>
+                        <option value="CHAIR_CAR">Chair Car</option>
+                        <option value="GENERAL">General</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>📍 Boarding Station</label>
+                    <select name="boarding_stop_id" id="boarding" required>
+                        <option value="">Select Boarding Station</option>
+
+                        {% for stop in stops %}
+                        <option value="{{ stop.schedule_stop_id }}"
+                                data-schedule="{{ stop.schedule_id }}">
+                            {{ stop.station_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>📍 Destination Station</label>
+                    <select name="alighting_stop_id" id="alighting" required>
+                        <option value="">Select Destination</option>
+
+                        {% for stop in stops %}
+                        <option value="{{ stop.schedule_stop_id }}"
+                                data-schedule="{{ stop.schedule_id }}">
+                            {{ stop.station_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card">
+
+            <h2>👥 Passenger Details</h2>
+
+            <div id="passengers">
+
+                <div class="passenger">
+
+                    <input type="text"
+                           name="passenger_name[]"
+                           placeholder="Passenger Name"
+                           required>
+
+                    <input type="number"
+                           name="age[]"
+                           placeholder="Age"
+                           min="1"
+                           max="120"
+                           required>
+
+                    <select name="gender[]" required>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button type="button" class="add-btn" onclick="addPassenger()">
+                + Add Passenger
+            </button>
+
+            <button type="submit" class="submit-btn">
+                Continue to Payment →
+            </button>
+
+        </div>
+
+    </form>
+
+    <a class="back" href="{{ url_for('passenger.dashboard') }}">
+        ← Back to Passenger Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+<script>
+
+function filterStops() {
+
+    const schedule = document.getElementById("schedule").value;
+
+    ["boarding", "alighting"].forEach(id => {
+
+        const select = document.getElementById(id);
+
+        select.value = "";
+
+        Array.from(select.options).forEach(option => {
+
+            if (option.dataset.schedule) {
+
+                const match = option.dataset.schedule === schedule;
+
+                option.hidden = !match;
+                option.disabled = !match;
+
+            }
+
+        });
+
+    });
+
+}
+
+document.getElementById("schedule").addEventListener("change", filterStops);
+
+
+function addPassenger() {
+
+    const container = document.getElementById("passengers");
+
+    if (container.children.length >= 6) {
+        alert("Maximum 6 passengers allowed.");
+        return;
+    }
+
+    const div = document.createElement("div");
+
+    div.className = "passenger";
+
+    div.innerHTML = `
+        <input type="text"
+               name="passenger_name[]"
+               placeholder="Passenger Name"
+               required>
+
+        <input type="number"
+               name="age[]"
+               placeholder="Age"
+               min="1"
+               max="120"
+               required>
+
+        <select name="gender[]" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <button type="button"
+                class="remove-btn"
+                onclick="this.parentElement.remove()">
+            ✕
+        </button>
+    `;
+
+    container.appendChild(div);
+
+}
+
+</script>
+
+</body>
+</html>

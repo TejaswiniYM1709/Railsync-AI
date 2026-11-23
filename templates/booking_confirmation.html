@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f5fa;
+            color: #243b55;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 25px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #ffffff20;
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: 0 5px 25px #17365d12;
+        }
+
+        .success {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e8edf5;
+        }
+
+        .success-icon {
+            width: 75px;
+            height: 75px;
+            background: #e2f7eb;
+            color: #159653;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            margin: 0 auto 18px;
+        }
+
+        .success h1 {
+            color: #16834a;
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .success p {
+            color: #8492a6;
+        }
+
+        h3 {
+            color: #17365d;
+            margin: 25px 0 18px;
+            font-size: 19px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .detail-box {
+            background: #f5f8fc;
+            padding: 17px;
+            border-radius: 10px;
+        }
+
+        .detail-box span {
+            display: block;
+            color: #8492a6;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .detail-box strong {
+            color: #243b55;
+            font-size: 16px;
+            word-break: break-word;
+        }
+
+        .fare {
+            color: #16834a !important;
+            font-size: 20px !important;
+        }
+
+        .passenger-list {
+            background: #f5f8fc;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .passenger-list p {
+            padding: 9px 0;
+            border-bottom: 1px solid #e1e8f0;
+        }
+
+        .passenger-list p:last-child {
+            border-bottom: none;
+        }
+
+        .payment {
+            margin-top: 25px;
+            background: #e5f7ec;
+            color: #16834a;
+            padding: 15px;
+            border-radius: 9px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .dashboard-btn {
+            display: block;
+            text-align: center;
+            margin-top: 25px;
+            padding: 15px;
+            background: #1769aa;
+            color: white;
+            text-decoration: none;
+            border-radius: 9px;
+            font-weight: bold;
+        }
+
+        .dashboard-btn:hover {
+            background: #124d80;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8492a6;
+            font-size: 13px;
+        }
+
+        @media(max-width: 550px) {
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 23px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <div class="success">
+            <div class="success-icon">✓</div>
+            <h1>Booking Successful!</h1>
+            <p>Your railway ticket has been confirmed successfully.</p>
+        </div>
+
+        <h3>🎫 Booking Details</h3>
+
+        <div class="details">
+
+            <div class="detail-box">
+                <span>PNR NUMBER</span>
+                <strong>{{ pnr }}</strong>
+            </div>
+
+            <div class="detail-box">
+                <span>TICKET REFERENCE</span>
+                <strong>{{ ticket_ref }}</strong>
+            </div>
+
+            <div class="detail-box">
+                <span>TOTAL FARE</span>
+                <strong class="fare">₹{{ "%.2f"|format(total_fare) }}</strong>
+            </div>
+
+        </div>
+
+        <h3>👥 Passenger Details</h3>
+
+        <div class="passenger-list">
+            {% for name in names %}
+                <p>{{ loop.index }}. {{ name }}</p>
+            {% endfor %}
+        </div>
+
+        <div class="payment">
+            ✓ Payment Status: SUCCESS
+        </div>
+
+        <a class="dashboard-btn"
+           href="{{ url_for('passenger.dashboard') }}">
+            Back to Passenger Dashboard →
+        </a>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

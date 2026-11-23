@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My QR Tickets | RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #243b55;
+        }
+
+        header {
+            background: linear-gradient(120deg, #102d4a, #17628b);
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 span {
+            color: #65d5ff;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,.15);
+            padding: 10px 17px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+            text-align: center;
+            padding: 40px 15px 75px;
+        }
+
+        .hero h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            color: #dcefff;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: -45px auto 40px;
+            padding: 0 18px;
+            position: relative;
+        }
+
+        .main-card {
+            background: white;
+            padding: 30px;
+            border-radius: 17px;
+            box-shadow: 0 8px 25px rgba(0,0,0,.07);
+        }
+
+        .section-title {
+            color: #123d61;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8995a5;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .ticket {
+            border: 1px solid #dce6ef;
+            border-radius: 14px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            transition: .3s;
+        }
+
+        .ticket:hover {
+            box-shadow: 0 8px 22px rgba(0,0,0,.08);
+            transform: translateY(-2px);
+        }
+
+        .ticket-header {
+            background: linear-gradient(120deg, #123d61, #17628b);
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .ticket-header h3 {
+            font-size: 19px;
+        }
+
+        .ticket-header small {
+            display: block;
+            color: #c9e7f7;
+            margin-top: 5px;
+        }
+
+        .badge {
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            background: #d8f9e6;
+            color: #137944;
+            white-space: nowrap;
+        }
+
+        .ticket-body {
+            padding: 25px;
+        }
+
+        .pnr-box {
+            background: #f0f6fb;
+            border: 1px dashed #9abbd3;
+            padding: 15px;
+            border-radius: 9px;
+            margin-bottom: 22px;
+        }
+
+        .pnr-box small {
+            color: #8291a3;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .pnr-box strong {
+            color: #123d61;
+            font-size: 19px;
+            letter-spacing: 1px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+            margin-bottom: 25px;
+        }
+
+        .detail small {
+            display: block;
+            color: #8995a5;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .detail strong {
+            color: #34465a;
+            font-size: 14px;
+        }
+
+        .token-section {
+            background: #f5f8fc;
+            border: 1px dashed #b9cad9;
+            padding: 20px;
+            border-radius: 11px;
+            margin-bottom: 22px;
+        }
+
+        .token-section h4 {
+            color: #123d61;
+            margin-bottom: 12px;
+        }
+
+        .token {
+            background: white;
+            border: 1px solid #dce3eb;
+            border-radius: 8px;
+            padding: 14px;
+            font-family: monospace;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+            color: #17628b;
+            line-height: 1.7;
+        }
+
+        .token-note {
+            color: #8291a3;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-top: 18px;
+            border-top: 1px solid #edf0f4;
+        }
+
+        .status-item small {
+            display: block;
+            color: #8995a5;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .status-item strong {
+            font-size: 13px;
+            color: #34465a;
+        }
+
+        .active {
+            color: #16834b !important;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            background: #f7f9fc;
+            border-radius: 12px;
+        }
+
+        .empty h3 {
+            color: #123d61;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            color: #8995a5;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 21px;
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 650;
+            margin-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8995a5;
+            font-size: 13px;
+        }
+
+        @media(max-width: 550px) {
+            .main-card {
+                padding: 19px;
+            }
+
+            .details {
+                gap: 17px;
+            }
+
+            .ticket-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .status-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Rail<span>Sync</span></h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<section class="hero">
+    <h1>🎫 My Digital Tickets</h1>
+    <p>Your journey details and secure QR token references.</p>
+</section>
+
+<div class="container">
+
+    <div class="main-card">
+
+        <h2 class="section-title">Your QR Tickets</h2>
+
+        <p class="subtitle">
+            Access your passenger ticket information anytime.
+        </p>
+
+        {% if tickets %}
+
+            {% for ticket in tickets %}
+
+            <div class="ticket">
+
+                <div class="ticket-header">
+
+                    <div>
+                        <h3>🚆 {{ ticket.train_name }}</h3>
+                        <small>Train Number: {{ ticket.train_number }}</small>
+                    </div>
+
+                    <span class="badge">
+                        {{ ticket.token_status }}
+                    </span>
+
+                </div>
+
+                <div class="ticket-body">
+
+                    <div class="pnr-box">
+                        <small>BOOKING PNR</small>
+                        <strong>{{ ticket.pnr_number }}</strong>
+                    </div>
+
+                    <div class="details">
+
+                        <div class="detail">
+                            <small>👤 Passenger</small>
+                            <strong>{{ ticket.passenger_name }}</strong>
+                        </div>
+
+                        <div class="detail">
+                            <small>🎂 Age</small>
+                            <strong>{{ ticket.age }}</strong>
+                        </div>
+
+                        <div class="detail">
+                            <small>📅 Journey Date</small>
+                            <strong>{{ ticket.journey_date }}</strong>
+                        </div>
+
+                        <div class="detail">
+                            <small>📋 Booking Status</small>
+                            <strong>{{ ticket.booking_status }}</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="token-section">
+
+                        <h4>▦ QR Token Reference</h4>
+
+                        <div class="token">
+                            {{ ticket.token_reference }}
+                        </div>
+
+                        <p class="token-note">
+                            Keep this token reference available for
+                            staff verification.
+                        </p>
+
+                    </div>
+
+                    <div class="status-row">
+
+                        <div class="status-item">
+                            <small>ISSUED DATE</small>
+                            <strong>{{ ticket.issued_at }}</strong>
+                        </div>
+
+                        <div class="status-item">
+                            <small>EXPIRY TIME</small>
+                            <strong>{{ ticket.expiry_time }}</strong>
+                        </div>
+
+                        <div class="status-item">
+                            <small>QR TOKEN STATUS</small>
+                            <strong class="active">
+                                {{ ticket.token_status }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                <h3>🎫 No QR Tickets Found</h3>
+                <p>Your QR tickets will appear here after booking.</p>
+            </div>
+
+        {% endif %}
+
+        <a href="{{ url_for('passenger.dashboard') }}" class="btn">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

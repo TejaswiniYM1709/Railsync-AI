@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Platform Allocation - RailSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 550px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #172554;
+        }
+
+        label {
+            display: block;
+            margin-top: 18px;
+            font-weight: bold;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 7px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 22px;
+            padding: 12px 20px;
+            background: #172554;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .message {
+            color: #dc2626;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Edit Platform Allocation</h1>
+
+    <p>Station: {{ allocation.station_name }}</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="message">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <label>Select Platform</label>
+        <select name="platform_id" required>
+            {% for platform in platforms %}
+            <option value="{{ platform.platform_id }}"
+                {% if platform.platform_id == allocation.platform_id %}selected{% endif %}>
+                Platform {{ platform.platform_number }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <label>Arrival Time</label>
+        <input type="datetime-local"
+               name="arrival_time"
+               value="{{ allocation.arrival_time.strftime('%Y-%m-%dT%H:%M') }}"
+               required>
+
+        <label>Departure Time</label>
+        <input type="datetime-local"
+               name="departure_time"
+               value="{{ allocation.departure_time.strftime('%Y-%m-%dT%H:%M') }}"
+               required>
+
+        <button type="submit">Update Allocation</button>
+
+    </form>
+
+    <br>
+    <a href="{{ url_for('admin.manage_platform_allocations') }}">
+        ← Back to Platform Allocations
+    </a>
+
+</div>
+
+</body>
+</html>

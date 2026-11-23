@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Train Management - RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #243b55;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 { font-size: 24px; }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #ffffff20;
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 1350px;
+            margin: 35px auto;
+            padding: 0 25px;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #17365d;
+            margin-bottom: 8px;
+        }
+
+        .subtitle { color: #8492a6; }
+
+        .add-btn {
+            display: inline-block;
+            background: #1769aa;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .add-btn:hover { background: #124d80; }
+
+        .message {
+            padding: 13px;
+            margin-bottom: 12px;
+            background: #e5f7ec;
+            color: #176b3a;
+            border-radius: 8px;
+        }
+
+        .table-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #17365d10;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 850px;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e8edf4;
+            font-size: 14px;
+        }
+
+        tr:hover { background: #f5f9ff; }
+
+        .badge {
+            padding: 6px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .inactive {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .edit, .status-btn {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            margin: 2px;
+        }
+
+        .edit { background: #1769aa; }
+        .deactivate { background: #c62828; }
+        .activate { background: #2e7d32; }
+
+        .edit:hover { background: #124d80; }
+        .deactivate:hover { background: #a51d1d; }
+        .activate:hover { background: #1b5e20; }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #8492a6;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #1769aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8492a6;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync Admin</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="heading">
+        <div>
+            <h1>🚆 Train Management</h1>
+            <p class="subtitle">
+                View, update and manage all registered trains.
+            </p>
+        </div>
+
+        <a href="/admin/trains/add" class="add-btn">
+            + Add New Train
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="message">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="table-card">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Train ID</th>
+                    <th>Train Number</th>
+                    <th>Train Name</th>
+                    <th>Train Type</th>
+                    <th>Operating Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for train in trains %}
+                <tr>
+                    <td>#{{ train.train_id }}</td>
+
+                    <td>{{ train.train_number }}</td>
+
+                    <td><strong>{{ train.train_name }}</strong></td>
+
+                    <td>{{ train.train_type }}</td>
+
+                    <td>
+                        {% if train.operating_status == 'ACTIVE' %}
+                            <span class="badge active">ACTIVE</span>
+                        {% else %}
+                            <span class="badge inactive">INACTIVE</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a class="edit"
+                           href="/admin/trains/edit/{{ train.train_id }}">
+                            ✏ Edit
+                        </a>
+
+                        <form method="POST"
+                              action="/admin/trains/status/{{ train.train_id }}"
+                              style="display:inline;"
+                              onsubmit="return confirm('Change train status?');">
+
+                            {% if train.operating_status == 'ACTIVE' %}
+
+                                <input type="hidden"
+                                       name="status"
+                                       value="INACTIVE">
+
+                                <button class="status-btn deactivate"
+                                        type="submit">
+                                    Deactivate
+                                </button>
+
+                            {% else %}
+
+                                <input type="hidden"
+                                       name="status"
+                                       value="ACTIVE">
+
+                                <button class="status-btn activate"
+                                        type="submit">
+                                    Activate
+                                </button>
+
+                            {% endif %}
+
+                        </form>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty">
+                        No trains found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <a class="back" href="/admin/dashboard">
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

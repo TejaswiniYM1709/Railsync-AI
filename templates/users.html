@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #142b4a;
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 { font-size: 23px; }
+
+        header a {
+            color: white;
+            background: #dc3545;
+            padding: 9px 17px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            color: #142b4a;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        th {
+            background: #142b4a;
+            color: white;
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #475569;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .role {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #94a3b8;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media(max-width: 500px) {
+            header { padding: 18px; }
+            .table-card { padding: 15px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync | Admin Portal</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="heading">
+        <h1>User Management</h1>
+        <p>View and monitor all registered RailSync users and their account details.</p>
+    </div>
+
+    <div class="table-card">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Email Address</th>
+                    <th>Role</th>
+                    <th>Account Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>#{{ user.user_id }}</td>
+                    <td><strong>{{ user.full_name }}</strong></td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="role">{{ user.role }}</span>
+                    </td>
+                    <td>
+                        <span class="status">{{ user.account_status }}</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="empty">
+                        No registered users found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <a href="{{ url_for('admin.dashboard') }}" class="back-link">
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

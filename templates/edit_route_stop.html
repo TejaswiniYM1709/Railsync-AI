@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Route Stop - RailSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 8px;
+        }
+
+        h1 { color: #17365d; }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background: #17365d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Edit Route Stop</h1>
+    <p>Update route stop details.</p>
+
+    <form method="POST">
+
+        <label>Select Station</label>
+        <select name="station_id" required>
+            {% for station in stations %}
+                <option value="{{ station.station_id }}"
+                    {% if station.station_id == stop.station_id %}selected{% endif %}>
+                    {{ station.station_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <label>Stop Number</label>
+        <input type="number" name="stop_number"
+               value="{{ stop.stop_number }}" min="1" required>
+
+        <label>Distance from Source (KM)</label>
+        <input type="number" name="distance_from_source"
+               value="{{ stop.distance_from_source }}"
+               min="0" step="0.01" required>
+
+        <button type="submit">Update Route Stop</button>
+
+    </form>
+
+    <br>
+    <a href="/admin/route-stops">← Back to Route Stops</a>
+
+</div>
+
+</body>
+</html>

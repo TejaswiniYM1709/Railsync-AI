@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings | RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #243b55;
+        }
+
+        header {
+            background: linear-gradient(120deg, #102d4a, #17628b);
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 span {
+            color: #65d5ff;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,.15);
+            padding: 10px 17px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+            text-align: center;
+            padding: 38px 15px 75px;
+        }
+
+        .hero h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            color: #dcefff;
+        }
+
+        .container {
+            max-width: 1150px;
+            margin: -45px auto 40px;
+            padding: 0 18px;
+            position: relative;
+        }
+
+        .booking-container {
+            background: white;
+            padding: 30px;
+            border-radius: 17px;
+            box-shadow: 0 8px 25px rgba(0,0,0,.07);
+        }
+
+        .section-title {
+            color: #123d61;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8190a0;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .booking-card {
+            border: 1px solid #e3eaf1;
+            border-radius: 13px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: .3s;
+        }
+
+        .booking-card:hover {
+            box-shadow: 0 7px 20px rgba(0,0,0,.07);
+            transform: translateY(-2px);
+        }
+
+        .booking-header {
+            background: #f1f7fc;
+            padding: 17px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pnr {
+            color: #123d61;
+            font-weight: 750;
+            font-size: 16px;
+        }
+
+        .status {
+            padding: 7px 14px;
+            border-radius: 20px;
+            background: #e2f8eb;
+            color: #16834b;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .booking-body {
+            padding: 23px;
+        }
+
+        .train-name {
+            color: #123d61;
+            font-size: 19px;
+            font-weight: 750;
+            margin-bottom: 7px;
+        }
+
+        .train-number {
+            color: #8492a3;
+            font-size: 13px;
+            margin-bottom: 22px;
+        }
+
+        .journey {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .journey label {
+            display: block;
+            color: #8795a5;
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .journey strong {
+            color: #123d61;
+            font-size: 16px;
+        }
+
+        .details {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 18px;
+            padding-top: 20px;
+        }
+
+        .detail-item small {
+            display: block;
+            color: #8995a5;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .detail-item strong {
+            color: #34465a;
+            font-size: 15px;
+        }
+
+        .fare {
+            color: #16834b !important;
+            font-size: 18px !important;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 55px 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .empty h3 {
+            color: #123d61;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            color: #8492a3;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 13px 21px;
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 650;
+        }
+
+        .btn:hover {
+            box-shadow: 0 6px 15px rgba(22,130,189,.25);
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8995a5;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            .booking-container {
+                padding: 20px;
+            }
+
+            .journey {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .details {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Rail<span>Sync</span></h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<section class="hero">
+    <h1>🎫 My Bookings</h1>
+    <p>All your journeys, organized in one place.</p>
+</section>
+
+<div class="container">
+
+    <div class="booking-container">
+
+        <h2 class="section-title">Your Ticket Reservations</h2>
+
+        <p class="subtitle">
+            View your PNR, train details, passenger count and fare.
+        </p>
+
+        {% if bookings %}
+
+            {% for booking in bookings %}
+
+            <div class="booking-card">
+
+                <div class="booking-header">
+
+                    <div class="pnr">
+                        PNR: {{ booking.pnr_number }}
+                    </div>
+
+                    <span class="status">
+                        {{ booking.booking_status }}
+                    </span>
+
+                </div>
+
+                <div class="booking-body">
+
+                    <div class="train-name">
+                        🚆 {{ booking.train_name }}
+                    </div>
+
+                    <div class="train-number">
+                        Train Number: {{ booking.train_number }}
+                    </div>
+
+                    <div class="journey">
+
+                        <div>
+                            <label>📍 FROM</label>
+                            <strong>{{ booking.source_station }}</strong>
+                        </div>
+
+                        <div>
+                            <label>📍 TO</label>
+                            <strong>{{ booking.destination_station }}</strong>
+                        </div>
+
+                    </div>
+
+                    <div class="details">
+
+                        <div class="detail-item">
+                            <small>📅 Journey Date</small>
+                            <strong>{{ booking.journey_date }}</strong>
+                        </div>
+
+                        <div class="detail-item">
+                            <small>👥 Passengers</small>
+                            <strong>{{ booking.total_passengers }}</strong>
+                        </div>
+
+                        <div class="detail-item">
+                            <small>💰 Total Fare</small>
+                            <strong class="fare">
+                                ₹{{ booking.total_fare }}
+                            </strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                <h3>🎫 No Bookings Found</h3>
+                <p>You haven't booked any tickets yet.</p>
+            </div>
+
+        {% endif %}
+
+        <a href="{{ url_for('passenger.dashboard') }}" class="btn">
+            ← Back to Dashboard
+        </a>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

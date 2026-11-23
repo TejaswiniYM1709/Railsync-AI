@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Platform Allocation - RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #243b55;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 25px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #ffffff20;
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px #17365d12;
+        }
+
+        h1 {
+            color: #17365d;
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #8492a6;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: bold;
+            color: #334e68;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d5deea;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fbfcfe;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: #2878c8;
+            box-shadow: 0 0 0 3px #2878c820;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 28px;
+            padding: 14px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #124d80;
+        }
+
+        .flash {
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fee2e2;
+            color: #991b1b;
+            border-radius: 8px;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 22px;
+            color: #1769aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8492a6;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync Admin</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>🚉 Add Platform Allocation</h1>
+        <p class="subtitle">
+            Assign a platform to a scheduled train stop and specify arrival and departure times.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <label>Select Train Schedule Stop</label>
+            <select name="schedule_stop_id" required>
+                <option value="">-- Select Schedule Stop --</option>
+
+                {% for stop in schedule_stops %}
+                <option value="{{ stop.schedule_stop_id }}">
+                    {{ stop.train_number }} - {{ stop.train_name }}
+                    | {{ stop.station_name }}
+                    | {{ stop.journey_date }}
+                    | Stop ID: {{ stop.schedule_stop_id }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Select Platform</label>
+            <select name="platform_id" required>
+                <option value="">-- Select Platform --</option>
+
+                {% for platform in platforms %}
+                <option value="{{ platform.platform_id }}">
+                    Station ID {{ platform.station_id }}
+                    - Platform {{ platform.platform_number }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label>Arrival Time</label>
+            <input type="datetime-local" name="arrival_time" required>
+
+            <label>Departure Time</label>
+            <input type="datetime-local" name="departure_time" required>
+
+            <button type="submit">Allocate Platform →</button>
+
+        </form>
+
+        <a class="back" href="{{ url_for('admin.manage_platform_allocations') }}">
+            ← Back to Platform Allocations
+        </a>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

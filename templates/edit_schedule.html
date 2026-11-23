@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Schedule - RailSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 8px;
+        }
+
+        h1 { color: #17365d; }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background: #17365d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Edit Schedule</h1>
+    <p>Update train journey schedule details.</p>
+
+    <form method="POST">
+
+        <label>Journey Date</label>
+        <input type="date"
+               name="journey_date"
+               value="{{ schedule.journey_date }}"
+               required>
+
+        <label>Schedule Status</label>
+        <select name="schedule_status" required>
+            {% for status in ["SCHEDULED", "DELAYED", "CANCELLED", "COMPLETED"] %}
+                <option value="{{ status }}"
+                    {% if schedule.schedule_status == status %}selected{% endif %}>
+                    {{ status }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Update Schedule</button>
+
+    </form>
+
+    <br>
+    <a href="/admin/schedules">← Back to Schedule Management</a>
+
+</div>
+
+</body>
+</html>

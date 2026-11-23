@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Management | RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #142b4a;
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 23px;
+        }
+
+        header a {
+            color: white;
+            background: #dc3545;
+            padding: 9px 17px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 25px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            color: #142b4a;
+            font-size: 29px;
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #64748b;
+        }
+
+        .top-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+        }
+
+        .top-card h3 {
+            color: #142b4a;
+            margin-bottom: 6px;
+        }
+
+        .top-card p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .add-btn {
+            background: #2563eb;
+            color: white;
+            padding: 11px 18px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .add-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .table-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th {
+            background: #142b4a;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #dcfce7;
+            color: #166534;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #2563eb;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .edit-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 22px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            header {
+                padding: 18px;
+            }
+
+            .container {
+                padding: 0 15px;
+                margin: 25px auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync | Admin Portal</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="heading">
+        <h1>Schedule Management</h1>
+        <p>View, organize and manage all registered train schedules.</p>
+    </div>
+
+    <div class="top-card">
+        <div>
+            <h3>Train Schedule Directory</h3>
+            <p>Manage journey dates and train schedule information.</p>
+        </div>
+
+        <a href="/admin/schedules/add" class="add-btn">
+            + Add New Schedule
+        </a>
+    </div>
+
+    <div class="table-card">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Schedule ID</th>
+                    <th>Train Number</th>
+                    <th>Train Name</th>
+                    <th>Journey Date</th>
+                    <th>Schedule Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for schedule in schedules %}
+                <tr>
+                    <td>#{{ schedule.schedule_id }}</td>
+                    <td><strong>{{ schedule.train_number }}</strong></td>
+                    <td>{{ schedule.train_name }}</td>
+                    <td>{{ schedule.journey_date }}</td>
+                    <td>
+                        <span class="status">
+                            {{ schedule.schedule_status }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="/admin/schedules/edit/{{ schedule.schedule_id }}"
+                           class="edit-btn">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color:#64748b;">
+                        No schedules available.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <a href="/admin/dashboard" class="back-link">
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

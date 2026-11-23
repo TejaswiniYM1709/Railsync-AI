@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RailSync | Passenger Dashboard</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f5f9;
+            color: #142b45;
+        }
+
+        header {
+            background: #142b45;
+            color: white;
+            padding: 22px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 { margin: 0; }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #2878b5;
+            padding: 11px 22px;
+            border-radius: 7px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #142b45, #2878b5);
+            color: white;
+            padding: 45px 6%;
+        }
+
+        .hero h2 { font-size: 30px; }
+
+        .container { padding: 35px 6%; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 22px;
+            margin-top: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 28px;
+            border-radius: 13px;
+            box-shadow: 0 4px 15px #dce3eb;
+            text-decoration: none;
+            color: #142b45;
+            transition: 0.2s;
+            border-bottom: 4px solid #2878b5;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 7px 20px #c5d3e0;
+        }
+
+        .icon { font-size: 35px; }
+
+        .card h3 { margin-bottom: 10px; }
+
+        .card p {
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: #142b45;
+            color: white;
+            text-align: center;
+            padding: 18px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>🚆 RailSync</h1>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<section class="hero">
+    <h2>Welcome, {{ current_user.full_name }}!</h2>
+    <p>Your journey, your convenience. Manage everything in one place.</p>
+</section>
+
+<div class="container">
+
+    <h2>Passenger Services</h2>
+    <p>Explore your railway services.</p>
+
+    <div class="grid">
+
+        <a class="card" href="{{ url_for('passenger.profile') }}">
+            <div class="icon">👤</div>
+            <h3>My Profile</h3>
+            <p>View your personal account details.</p>
+        </a>
+
+        <a class="card" href="{{ url_for('passenger.search_trains') }}">
+            <div class="icon">🚆</div>
+            <h3>Search Trains</h3>
+            <p>Find available trains and schedules.</p>
+        </a>
+
+        <a class="card" href="{{ url_for('passenger.book_ticket') }}">
+            <div class="icon">🎫</div>
+            <h3>Book Tickets</h3>
+            <p>Book your railway journey.</p>
+        </a>
+
+        <a class="card" href="{{ url_for('passenger.my_bookings') }}">
+            <div class="icon">📋</div>
+            <h3>My Bookings</h3>
+            <p>View your confirmed reservations.</p>
+        </a>
+
+        <a class="card" href="{{ url_for('passenger.my_qr_ticket') }}">
+            <div class="icon">📱</div>
+            <h3>My QR Ticket</h3>
+            <p>Access your digital ticket details.</p>
+        </a>
+
+        <a class="card" href="{{ url_for('passenger.journey_history') }}">
+            <div class="icon">🛤️</div>
+            <h3>Journey History</h3>
+            <p>Explore your previous bookings.</p>
+        </a>
+
+        <a class="card" href="{{ url_for('passenger.submit_complaint') }}">
+            <div class="icon">⚠️</div>
+            <h3>Submit Complaint</h3>
+            <p>Share feedback or report an issue.</p>
+        </a>
+
+    </div>
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

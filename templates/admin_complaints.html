@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Management - RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #243b55;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 24px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #ffffff20;
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: 35px auto;
+            padding: 0 25px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            color: #17365d;
+            margin-bottom: 8px;
+        }
+
+        .heading p {
+            color: #8492a6;
+        }
+
+        .table-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #17365d10;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1100px;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e8edf4;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background: #f5f9ff;
+        }
+
+        .description {
+            max-width: 220px;
+            line-height: 1.5;
+        }
+
+        select {
+            padding: 9px;
+            border: 1px solid #d5deea;
+            border-radius: 7px;
+            background: white;
+            outline: none;
+        }
+
+        button {
+            padding: 9px 14px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        button:hover {
+            background: #124d80;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 35px;
+            color: #8492a6;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #1769aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8492a6;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync Admin</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="heading">
+        <h1>📋 Complaint Management</h1>
+        <p>View passenger complaints and manage their resolution status.</p>
+    </div>
+
+    <div class="table-card">
+
+        {% if complaints %}
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Passenger</th>
+                    <th>Complaint Type</th>
+                    <th>Description</th>
+                    <th>PNR</th>
+                    <th>Station</th>
+                    <th>Date</th>
+                    <th>Status / Update</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in complaints %}
+                <tr>
+                    <td>#{{ c.complaint_id }}</td>
+
+                    <td>{{ c.full_name }}</td>
+
+                    <td>{{ c.complaint_type }}</td>
+
+                    <td class="description">{{ c.description }}</td>
+
+                    <td>{{ c.pnr_number or 'N/A' }}</td>
+
+                    <td>{{ c.station_name or 'N/A' }}</td>
+
+                    <td>{{ c.created_at }}</td>
+
+                    <td>
+                        <form method="POST"
+                              action="{{ url_for('admin.update_complaint', complaint_id=c.complaint_id) }}">
+
+                            <select name="complaint_status" required>
+
+                                <option value="OPEN"
+                                    {% if c.complaint_status == 'OPEN' %}selected{% endif %}>
+                                    OPEN
+                                </option>
+
+                                <option value="IN_PROGRESS"
+                                    {% if c.complaint_status == 'IN_PROGRESS' %}selected{% endif %}>
+                                    IN PROGRESS
+                                </option>
+
+                                <option value="RESOLVED"
+                                    {% if c.complaint_status == 'RESOLVED' %}selected{% endif %}>
+                                    RESOLVED
+                                </option>
+
+                                <option value="REJECTED"
+                                    {% if c.complaint_status == 'REJECTED' %}selected{% endif %}>
+                                    REJECTED
+                                </option>
+
+                            </select>
+
+                            <button type="submit">Update</button>
+
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <div class="empty">
+            <h3>No Complaints Found</h3>
+            <p>There are currently no passenger complaints.</p>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <a class="back" href="{{ url_for('admin.dashboard') }}">
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

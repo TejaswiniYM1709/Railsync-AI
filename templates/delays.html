@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delay Management - RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #243b55;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 { font-size: 24px; }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #ffffff20;
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: 35px auto;
+            padding: 0 25px;
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #17365d;
+            margin-bottom: 8px;
+        }
+
+        .subtitle { color: #8492a6; }
+
+        .add-btn {
+            background: #1769aa;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .add-btn:hover { background: #124d80; }
+
+        .flash {
+            padding: 13px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .table-card {
+            background: white;
+            padding: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 20px #17365d10;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 950px;
+        }
+
+        th {
+            background: #17365d;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e8edf4;
+            font-size: 14px;
+        }
+
+        tr:hover { background: #f5f9ff; }
+
+        .delay-value {
+            color: #c2410c;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #8492a6;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: #1769aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8492a6;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync Admin</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="heading">
+        <div>
+            <h1>⏱️ Train Delay Management</h1>
+            <p class="subtitle">
+                Monitor and manage train delay records across railway stations.
+            </p>
+        </div>
+
+        <a class="add-btn" href="{{ url_for('admin.add_delay') }}">
+            + Add New Delay
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <div class="table-card">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Delay ID</th>
+                    <th>Train Number</th>
+                    <th>Train Name</th>
+                    <th>Journey Date</th>
+                    <th>Station</th>
+                    <th>Delay (Minutes)</th>
+                    <th>Reason</th>
+                    <th>Recorded At</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for delay in delays %}
+                <tr>
+                    <td>#{{ delay.delay_id }}</td>
+                    <td>{{ delay.train_number }}</td>
+                    <td>{{ delay.train_name }}</td>
+                    <td>{{ delay.journey_date }}</td>
+                    <td>{{ delay.station_name }}</td>
+                    <td class="delay-value">
+                        {{ delay.delay_minutes }} min
+                    </td>
+                    <td>{{ delay.reason or '-' }}</td>
+                    <td>{{ delay.recorded_at }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty">
+                        No delay records found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <a class="back-link" href="{{ url_for('admin.dashboard') }}">
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Schedule Stops | RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        header {
+            background: #142b4a;
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 { font-size: 23px; }
+
+        header a {
+            color: white;
+            background: #dc3545;
+            padding: 9px 17px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1450px;
+            margin: 40px auto;
+            padding: 0 25px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        .heading h1 {
+            color: #142b4a;
+            font-size: 29px;
+            margin-bottom: 8px;
+        }
+
+        .heading p { color: #64748b; }
+
+        .info-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            border-left: 5px solid #2563eb;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04);
+        }
+
+        .info-card h3 {
+            color: #142b4a;
+            margin-bottom: 6px;
+        }
+
+        .info-card p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .table-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1150px;
+        }
+
+        th {
+            background: #142b4a;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        tbody tr:hover { background: #f8fafc; }
+
+        .platform {
+            background: #dbeafe;
+            color: #1e40af;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .edit-btn {
+            display: inline-block;
+            padding: 8px 14px;
+            background: #2563eb;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .edit-btn:hover { background: #1d4ed8; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 22px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            header { padding: 18px; }
+            .container { padding: 0 15px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync | Admin Portal</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="heading">
+        <h1>Schedule Stops Management</h1>
+        <p>Monitor train stops, station timings and platform assignments.</p>
+    </div>
+
+    <div class="info-card">
+        <h3>Train Route & Stop Details</h3>
+        <p>
+            View scheduled arrival and departure timings at each station
+            and manage platform assignments.
+        </p>
+    </div>
+
+    <div class="table-card">
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Stop ID</th>
+                    <th>Train Number</th>
+                    <th>Train Name</th>
+                    <th>Journey Date</th>
+                    <th>Station</th>
+                    <th>Stop Number</th>
+                    <th>Arrival</th>
+                    <th>Departure</th>
+                    <th>Platform</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for stop in schedule_stops %}
+                <tr>
+                    <td>#{{ stop.schedule_stop_id }}</td>
+                    <td><strong>{{ stop.train_number }}</strong></td>
+                    <td>{{ stop.train_name }}</td>
+                    <td>{{ stop.journey_date }}</td>
+                    <td>{{ stop.station_name }}</td>
+                    <td>{{ stop.stop_number }}</td>
+
+                    <td>{{ stop.scheduled_arrival or "Not Set" }}</td>
+                    <td>{{ stop.scheduled_departure or "Not Set" }}</td>
+
+                    <td>
+                        {% if stop.platform_number %}
+                            <span class="platform">
+                                {{ stop.platform_number }}
+                            </span>
+                        {% else %}
+                            Not Assigned
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="/admin/schedule-stops/edit/{{ stop.schedule_stop_id }}"
+                           class="edit-btn">
+                            Edit
+                        </a>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="10" style="text-align:center;color:#64748b;">
+                        No schedule stops found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+    <a href="/admin/dashboard" class="back-link">
+        ← Back to Admin Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

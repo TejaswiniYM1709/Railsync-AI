@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Route Stop - RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #243b55;
+            min-height: 100vh;
+        }
+
+        header {
+            background: #17365d;
+            color: white;
+            padding: 20px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 25px;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: #ffffff20;
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 45px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 5px 25px #17365d12;
+        }
+
+        h1 {
+            color: #17365d;
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #8492a6;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin: 20px 0 8px;
+            font-weight: bold;
+            color: #334e68;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d5deea;
+            border-radius: 8px;
+            font-size: 15px;
+            background: #fbfcfe;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #2878c8;
+            box-shadow: 0 0 0 3px #2878c820;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 28px;
+            padding: 14px;
+            background: #1769aa;
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #124d80;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 22px;
+            color: #1769aa;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #8492a6;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>🚆 RailSync Admin</h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>📍 Add Route Stop</h1>
+        <p class="subtitle">
+            Register a railway station as a stop on an existing route.
+        </p>
+
+        <form method="POST">
+
+            <label>Select Route</label>
+            <select name="route_id" required>
+                <option value="">Choose Route</option>
+                {% for route in routes %}
+                    <option value="{{ route.route_id }}">
+                        {{ route.route_name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label>Select Station</label>
+            <select name="station_id" required>
+                <option value="">Choose Station</option>
+                {% for station in stations %}
+                    <option value="{{ station.station_id }}">
+                        {{ station.station_name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <label>Stop Number</label>
+            <input type="number" name="stop_number"
+                   min="1" required placeholder="Enter stop number">
+
+            <label>Distance from Source (KM)</label>
+            <input type="number" name="distance_from_source"
+                   min="0" step="0.01" required
+                   placeholder="Enter distance in kilometres">
+
+            <button type="submit">Add Route Stop →</button>
+
+        </form>
+
+        <a class="back" href="/admin/route-stops">
+            ← Back to Route Stops
+        </a>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

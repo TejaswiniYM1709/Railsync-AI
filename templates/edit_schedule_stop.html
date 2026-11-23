@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Schedule Stop - RailSync</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5fa;
+            padding: 30px;
+        }
+
+        .container {
+            background: white;
+            padding: 25px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 8px;
+        }
+
+        h1 { color: #17365d; }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            background: #17365d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Edit Schedule Stop</h1>
+
+    <p><strong>Train:</strong> {{ stop.train_number }} - {{ stop.train_name }}</p>
+    <p><strong>Station:</strong> {{ stop.station_name }}</p>
+    <p><strong>Journey Date:</strong> {{ stop.journey_date }}</p>
+
+    <form method="POST">
+
+        <label>Scheduled Arrival</label>
+        <input type="datetime-local"
+               name="scheduled_arrival"
+               value="{{ stop.scheduled_arrival.strftime('%Y-%m-%dT%H:%M') if stop.scheduled_arrival else '' }}">
+
+        <label>Scheduled Departure</label>
+        <input type="datetime-local"
+               name="scheduled_departure"
+               value="{{ stop.scheduled_departure.strftime('%Y-%m-%dT%H:%M') if stop.scheduled_departure else '' }}">
+
+        <label>Platform</label>
+        <select name="platform_id">
+            <option value="">Select Platform</option>
+
+            {% for platform in platforms %}
+                <option value="{{ platform.platform_id }}"
+                    {% if stop.platform_id == platform.platform_id %}selected{% endif %}>
+                    Platform {{ platform.platform_number }}
+                </option>
+            {% endfor %}
+
+        </select>
+
+        <button type="submit">Update Schedule Stop</button>
+
+    </form>
+
+    <br>
+    <a href="/admin/schedule-stops">← Back to Schedule Stops</a>
+
+</div>
+
+</body>
+</html>

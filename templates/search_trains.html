@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Trains | RailSync</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f1f5f9;
+            color: #243b55;
+        }
+
+        header {
+            background: linear-gradient(120deg, #102d4a, #17628b);
+            color: white;
+            padding: 22px 7%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h2 {
+            font-size: 25px;
+        }
+
+        header span {
+            color: #65d5ff;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.15);
+            padding: 10px 18px;
+            border-radius: 8px;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            color: white;
+            padding: 45px 20px 90px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 34px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            color: #dcefff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: -55px auto 40px;
+            padding: 0 20px;
+            position: relative;
+        }
+
+        .search-card {
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.10);
+        }
+
+        .search-card h2 {
+            margin-bottom: 25px;
+            color: #123d61;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 650;
+            margin-bottom: 9px;
+            color: #34465a;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #dce3eb;
+            border-radius: 9px;
+            background: #f9fbfd;
+            font-size: 14px;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: #1682bd;
+            box-shadow: 0 0 0 3px rgba(22,130,189,0.1);
+        }
+
+        .date-field {
+            grid-column: span 2;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 25px;
+            background: linear-gradient(120deg, #123d61, #1682bd);
+            border: none;
+            border-radius: 9px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(22,130,189,0.25);
+        }
+
+        .results {
+            margin-top: 35px;
+        }
+
+        .results h2 {
+            margin-bottom: 20px;
+            color: #123d61;
+        }
+
+        .train-card {
+            background: white;
+            padding: 24px;
+            border-radius: 13px;
+            margin-bottom: 17px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+            border-left: 5px solid #1682bd;
+        }
+
+        .train-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .train-name {
+            font-size: 19px;
+            font-weight: bold;
+            color: #123d61;
+        }
+
+        .train-number {
+            font-size: 13px;
+            color: #8291a3;
+            margin-top: 5px;
+        }
+
+        .status {
+            background: #e4f8ed;
+            color: #16834b;
+            padding: 7px 13px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .journey {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            background: #f5f9fc;
+            padding: 17px;
+            border-radius: 10px;
+        }
+
+        .journey div {
+            text-align: center;
+        }
+
+        .journey strong {
+            display: block;
+            font-size: 17px;
+            color: #123d61;
+        }
+
+        .journey small {
+            color: #8190a0;
+            font-size: 12px;
+        }
+
+        .journey-line {
+            flex: 1;
+            border-top: 2px dashed #9bb8ce;
+            text-align: center;
+            color: #1682bd;
+            font-size: 12px;
+            padding-top: 7px;
+        }
+
+        .journey-date {
+            margin-top: 14px;
+            color: #728196;
+            font-size: 13px;
+        }
+
+        .empty {
+            background: white;
+            padding: 35px;
+            border-radius: 12px;
+            text-align: center;
+            color: #718096;
+        }
+
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            color: #17628b;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #8995a5;
+            font-size: 13px;
+        }
+
+        @media(max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .date-field {
+                grid-column: span 1;
+            }
+
+            .search-card {
+                padding: 23px;
+            }
+
+            .hero h1 {
+                font-size: 26px;
+            }
+
+            .journey {
+                padding: 12px 7px;
+            }
+
+            .journey strong {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h2>Rail<span>Sync</span></h2>
+    <a href="{{ url_for('auth.logout') }}">Logout</a>
+</header>
+
+<section class="hero">
+    <h1>Find Your Perfect Journey 🚆</h1>
+    <p>Search trains, explore routes and plan your next journey.</p>
+</section>
+
+<div class="container">
+
+    <div class="search-card">
+
+        <h2>🔎 Search Available Trains</h2>
+
+        <form method="POST">
+
+            <div class="form-grid">
+
+                <div>
+                    <label>📍 From Station</label>
+                    <select name="source" required>
+                        <option value="">Select Source</option>
+
+                        {% for station in stations %}
+                            <option value="{{ station.station_id }}">
+                                {{ station.station_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label>📍 To Station</label>
+                    <select name="destination" required>
+                        <option value="">Select Destination</option>
+
+                        {% for station in stations %}
+                            <option value="{{ station.station_id }}">
+                                {{ station.station_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="date-field">
+                    <label>📅 Journey Date</label>
+                    <input type="date" name="journey_date" required>
+                </div>
+
+            </div>
+
+            <button type="submit">Search Trains →</button>
+
+        </form>
+
+    </div>
+
+    {% if searched %}
+
+    <div class="results">
+
+        <h2>🚆 Search Results</h2>
+
+        {% if trains %}
+
+            {% for train in trains %}
+
+            <div class="train-card">
+
+                <div class="train-top">
+
+                    <div>
+                        <div class="train-name">
+                            {{ train.train_name }}
+                        </div>
+
+                        <div class="train-number">
+                            Train No: {{ train.train_number }}
+                        </div>
+                    </div>
+
+                    <span class="status">
+                        {{ train.schedule_status }}
+                    </span>
+
+                </div>
+
+                <div class="journey">
+
+                    <div>
+                        <strong>{{ train.departure }}</strong>
+                        <small>Departure</small>
+                    </div>
+
+                    <div class="journey-line">
+                        ● ───────── ●
+                    </div>
+
+                    <div>
+                        <strong>{{ train.arrival }}</strong>
+                        <small>Arrival</small>
+                    </div>
+
+                </div>
+
+                <div class="journey-date">
+                    📅 Journey Date: {{ train.journey_date }}
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                <h3>No trains found 😕</h3>
+                <p>Try another route or journey date.</p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    {% endif %}
+
+    <a class="back" href="{{ url_for('passenger.dashboard') }}">
+        ← Back to Passenger Dashboard
+    </a>
+
+</div>
+
+<footer>
+    © 2026 RailSync | Smart Railway Management System
+</footer>
+
+</body>
+</html>

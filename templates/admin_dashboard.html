@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RailSync Admin Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f1f4f8;
+        }
+
+        header {
+            background: #142b45;
+            color: white;
+            padding: 20px 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #ddd;
+        }
+
+        .card h3 {
+            color: #53677c;
+        }
+
+        .card p {
+            font-size: 32px;
+            font-weight: bold;
+            color: #142b45;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            margin-top: 30px;
+            border-radius: 12px;
+        }
+
+        .modules {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .module-link {
+            display: block;
+            background: #142b45;
+            color: white;
+            padding: 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .module-link:hover {
+            background: #24527a;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>RailSync Admin</h1>
+    <a href="/logout">Logout</a>
+</header>
+
+<div class="container">
+
+    <h2>Welcome, {{ current_user.full_name }}!</h2>
+    <p>Railway Management Administration Portal</p>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Total Users</h3>
+            <p>{{ stats.users }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Trains</h3>
+            <p>{{ stats.trains }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Stations</h3>
+            <p>{{ stats.stations }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Bookings</h3>
+            <p>{{ stats.bookings }}</p>
+        </div>
+
+    </div>
+
+    <div class="section">
+        <h2>Management Modules</h2>
+
+        <div class="modules">
+
+            <a class="module-link" href="{{ url_for('users.list_users') }}">
+                User Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_trains') }}">
+                Train Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_stations') }}">
+                Station Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_schedules') }}">
+                Schedule Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_complaints') }}">
+                Complaint Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_platform_allocations') }}">
+                Platform Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_delays') }}">
+                Delay Management
+            </a>
+
+            <a class="module-link" href="{{ url_for('admin.manage_platform_conflicts') }}">
+                Platform Conflict Management
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
