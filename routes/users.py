@@ -1,11 +1,41 @@
+import base64
+import io
 import uuid
+from datetime import date, datetime, time, timedelta
 
-from flask import Blueprint, render_template, abort, request, url_for, flash
+import qrcode
+from flask import Blueprint, render_template, abort, request, redirect, url_for, flash, session, send_file
 from flask_login import login_required, current_user
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader
+from reportlab.pdfgen import canvas
 from sqlalchemy import text
 
 from extensions import db
 from models import User
+
+UPI_ID = "saralaya@upi"
+UPI_NAME = "Saralaya"
+
+
+def _qr_png(value):
+    image = qrcode.make(value)
+    buffer = io.BytesIO()
+    image.save(buffer, format="PNG")
+    buffer.seek(0)
+    return buffer
+
+
+def _qr_image(value):
+    return "data:image/png;base64," + base64.b64encode(_qr_png(value).getvalue()).decode()
+
+
+def _upi_qr(amount, reference):
+    uri = (
+        f"upi://pay?pa={UPI_ID}&pn={UPI_NAME}"
+        f"&am={float(amount):.2f}&cu=INR&tn={reference}"
+    )
+    return _qr_image(uri)
 
 
 # ==========================================
@@ -344,144 +374,23 @@ def create_booking():
             + float(fare["fare_per_km"]) * distance
         ) * len(names)
 
-        # Generate booking references
-
-        pnr = "RS" + uuid.uuid4().hex[:10].upper()
-
-        transaction_ref = (
-            "TXN" + uuid.uuid4().hex[:12].upper()
-        )
-
-        ticket_ref = (
-            "TKT" + uuid.uuid4().hex[:12].upper()
-        )
-
-        # Insert booking
-
-        result = db.session.execute(text("""
-            INSERT INTO bookings
-            (
-                pnr_number,
-                user_id,
-                schedule_id,
-                boarding_schedule_stop_id,
-                alighting_schedule_stop_id,
-                total_passengers,
-                total_fare,
-                booking_status
-            )
-
-            VALUES
-            (
-                :pnr,
-                :user_id,
-                :schedule_id,
-                :boarding,
-                :alighting,
-                :count,
-                :fare,
-                'CONFIRMED'
-            )
-
-        """), {
-            "pnr": pnr,
-            "user_id": current_user.user_id,
+        transaction_ref = "TXN" + uuid.uuid4().hex[:12].upper()
+        session["pending_booking"] = {
             "schedule_id": schedule_id,
             "boarding": boarding_id,
             "alighting": alighting_id,
-            "count": len(names),
-            "fare": total_fare
-        })
-
-        booking_id = result.lastrowid
-
-        # Insert passengers
-
-        for name, age, gender in zip(names, ages, genders):
-
-            db.session.execute(text("""
-                INSERT INTO booking_passengers
-                (
-                    booking_id,
-                    passenger_name,
-                    age,
-                    gender,
-                    passenger_status
-                )
-
-                VALUES
-                (
-                    :booking_id,
-                    :name,
-                    :age,
-                    :gender,
-                    'CONFIRMED'
-                )
-
-            """), {
-                "booking_id": booking_id,
-                "name": name.strip(),
-                "age": int(age),
-                "gender": gender
-            })
-
-        # Insert simulated successful payment
-
-        db.session.execute(text("""
-            INSERT INTO payments
-            (
-                booking_id,
-                transaction_reference,
-                payment_method,
-                amount,
-                payment_status
-            )
-
-            VALUES
-            (
-                :booking_id,
-                :reference,
-                'UPI',
-                :amount,
-                'SUCCESS'
-            )
-
-        """), {
-            "booking_id": booking_id,
+            "names": names,
+            "ages": ages,
+            "genders": genders,
+            "fare": float(total_fare),
             "reference": transaction_ref,
-            "amount": total_fare
-        })
-
-        # Generate ticket record
-
-        db.session.execute(text("""
-            INSERT INTO tickets
-            (
-                booking_id,
-                ticket_reference,
-                ticket_status
-            )
-
-            VALUES
-            (
-                :booking_id,
-                :reference,
-                'ACTIVE'
-            )
-
-        """), {
-            "booking_id": booking_id,
-            "reference": ticket_ref
-        })
-
-        db.session.commit()
+        }
 
         return render_template(
-            "booking_confirmation.html",
-            pnr=pnr,
-            ticket_ref=ticket_ref,
-            total_fare=total_fare,
-            names=names
+            "payment.html",
+            amount=total_fare,
+            reference=transaction_ref,
+            qr_data=_upi_qr(total_fare, transaction_ref),
         )
 
     except Exception as e:
@@ -491,6 +400,195 @@ def create_booking():
         flash(str(e), "danger")
 
         return redirect(url_for("passenger.book_ticket"))
+
+
+@passenger_bp.route("/confirm-payment", methods=["POST"])
+@login_required
+def confirm_payment():
+
+    if current_user.role != "PASSENGER":
+        abort(403)
+
+    data = session.get("pending_booking")
+    if not data:
+        flash("Payment session expired. Please start your booking again.", "warning")
+        return redirect(url_for("passenger.book_ticket"))
+
+    try:
+        pnr = "RS" + uuid.uuid4().hex[:10].upper()
+        ticket_ref = "TKT" + uuid.uuid4().hex[:12].upper()
+
+        result = db.session.execute(text("""
+            INSERT INTO bookings
+            (
+                pnr_number, user_id, schedule_id,
+                boarding_schedule_stop_id, alighting_schedule_stop_id,
+                total_passengers, total_fare, booking_status
+            )
+            VALUES
+            (
+                :pnr, :user_id, :schedule_id, :boarding, :alighting,
+                :count, :fare, 'CONFIRMED'
+            )
+        """), {
+            "pnr": pnr,
+            "user_id": current_user.user_id,
+            "schedule_id": data["schedule_id"],
+            "boarding": data["boarding"],
+            "alighting": data["alighting"],
+            "count": len(data["names"]),
+            "fare": data["fare"],
+        })
+        booking_id = result.lastrowid
+
+        for name, age, gender in zip(data["names"], data["ages"], data["genders"]):
+            passenger = db.session.execute(text("""
+                INSERT INTO booking_passengers
+                (booking_id, passenger_name, age, gender, passenger_status)
+                VALUES (:booking_id, :name, :age, :gender, 'CONFIRMED')
+            """), {
+                "booking_id": booking_id,
+                "name": name.strip(),
+                "age": int(age),
+                "gender": gender,
+            })
+            db.session.execute(text("""
+                INSERT INTO qr_tokens
+                (booking_passenger_id, token_reference, expiry_time, token_status)
+                VALUES (:passenger, :reference, :expiry, 'ACTIVE')
+            """), {
+                "passenger": passenger.lastrowid,
+                "reference": "QRT" + uuid.uuid4().hex[:12].upper(),
+                "expiry": datetime.now() + timedelta(hours=2),
+            })
+
+        db.session.execute(text("""
+            INSERT INTO payments
+            (booking_id, transaction_reference, payment_method, amount, payment_status)
+            VALUES (:booking_id, :reference, 'UPI', :amount, 'SUCCESS')
+        """), {
+            "booking_id": booking_id,
+            "reference": data["reference"],
+            "amount": data["fare"],
+        })
+
+        db.session.execute(text("""
+            INSERT INTO tickets
+            (booking_id, ticket_reference, ticket_status)
+            VALUES (:booking_id, :reference, 'ACTIVE')
+        """), {
+            "booking_id": booking_id,
+            "reference": ticket_ref,
+        })
+
+        db.session.commit()
+        session.pop("pending_booking", None)
+
+        return render_template(
+            "booking_confirmation.html",
+            booking_id=booking_id,
+            pnr=pnr,
+            ticket_ref=ticket_ref,
+            total_fare=data["fare"],
+            names=data["names"],
+        )
+
+    except Exception as e:
+
+        db.session.rollback()
+
+        flash(str(e), "danger")
+
+        return redirect(url_for("passenger.book_ticket"))
+
+
+def _at(journey_date, clock, delay=0):
+    if not clock:
+        return None
+    try:
+        parsed_time = time.fromisoformat(str(clock)[:8])
+        parsed_date = date.fromisoformat(str(journey_date)[:10])
+    except ValueError:
+        return None
+    return datetime.combine(parsed_date, parsed_time) + timedelta(minutes=delay)
+
+
+@passenger_bp.route("/live-trains")
+@login_required
+def live_trains():
+
+    if current_user.role != "PASSENGER":
+        abort(403)
+
+    today = date.today()
+    rows = db.session.execute(text("""
+        SELECT
+            s.schedule_id,
+            t.train_number,
+            t.train_name,
+            s.journey_date,
+            s.schedule_status,
+            (
+                SELECT MAX(d.delay_minutes)
+                FROM delay_records d
+                WHERE d.schedule_id = s.schedule_id
+            ) AS delay_minutes
+        FROM schedules s
+        JOIN trains t ON s.train_id = t.train_id
+        WHERE t.operating_status = 'ACTIVE'
+          AND s.journey_date BETWEEN :today AND :tomorrow
+        ORDER BY s.journey_date, t.train_number
+    """), {
+        "today": today.isoformat(),
+        "tomorrow": (today + timedelta(days=1)).isoformat(),
+    }).mappings().all()
+
+    now = datetime.now()
+    trains = []
+
+    for row in rows:
+        stops = db.session.execute(text("""
+            SELECT
+                st.station_name,
+                ss.scheduled_arrival,
+                ss.scheduled_departure
+            FROM schedule_stops ss
+            JOIN route_stops rs ON ss.route_stop_id = rs.route_stop_id
+            JOIN stations st ON rs.station_id = st.station_id
+            WHERE ss.schedule_id = :schedule_id
+            ORDER BY rs.stop_number
+        """), {"schedule_id": row["schedule_id"]}).mappings().all()
+
+        delay = int(row["delay_minutes"] or 0)
+        times = [
+            (
+                stop["station_name"],
+                _at(row["journey_date"], stop["scheduled_arrival"], delay),
+                _at(row["journey_date"], stop["scheduled_departure"], delay),
+            )
+            for stop in stops
+        ]
+        future = [item for item in times if item[2] and item[2] > now]
+        if delay and times and (times[-1][1] is None or now < times[-1][1]):
+            status = "DELAYED"
+        elif times and times[-1][1] and now > times[-1][1]:
+            status = "COMPLETED"
+        elif times and now >= times[0][2]:
+            status = "RUNNING"
+        else:
+            status = "SCHEDULED"
+
+        trains.append({
+            "train_number": row["train_number"],
+            "train_name": row["train_name"],
+            "journey_date": row["journey_date"],
+            "status": status,
+            "delay": delay,
+            "next_stop": future[0][0] if future else "—",
+            "stops": " → ".join(stop["station_name"] for stop in stops),
+        })
+
+    return render_template("live_trains.html", trains=trains, updated=now)
 
 
 # ==========================================
@@ -512,6 +610,7 @@ def my_bookings():
             b.total_passengers,
             b.total_fare,
             b.booking_status,
+            p.payment_status,
 
             t.train_number,
             t.train_name,
@@ -547,6 +646,9 @@ def my_bookings():
         JOIN stations st2
             ON rs2.station_id = st2.station_id
 
+        LEFT JOIN payments p
+            ON p.booking_id = b.booking_id
+
         WHERE b.user_id = :user_id
 
         ORDER BY b.booking_date DESC
@@ -555,10 +657,195 @@ def my_bookings():
         "user_id": current_user.user_id
     }).mappings().all()
 
+    tickets = db.session.execute(text("""
+        SELECT
+            bp.booking_id,
+            bp.passenger_name,
+            bp.age,
+            bp.gender,
+            qt.token_reference,
+            qt.expiry_time,
+            qt.token_status
+
+        FROM booking_passengers bp
+
+        JOIN bookings b
+            ON bp.booking_id = b.booking_id
+
+        JOIN qr_tokens qt
+            ON qt.booking_passenger_id = bp.booking_passenger_id
+
+        WHERE b.user_id = :user_id
+
+        ORDER BY bp.booking_passenger_id
+
+    """), {
+        "user_id": current_user.user_id
+    }).mappings().all()
+
+    tickets_by_booking = {}
+    for ticket in tickets:
+        row = dict(ticket)
+        row["qr_data"] = _qr_image(row["token_reference"])
+        tickets_by_booking.setdefault(row["booking_id"], []).append(row)
+
     return render_template(
         "my_bookings.html",
-        bookings=bookings
+        bookings=bookings,
+        tickets_by_booking=tickets_by_booking
     )
+
+
+@passenger_bp.route("/booking/<int:booking_id>/pdf")
+@login_required
+def download_booking_pdf(booking_id):
+
+    if current_user.role != "PASSENGER":
+        abort(403)
+
+    booking = db.session.execute(text("""
+        SELECT
+            b.pnr_number,
+            b.booking_date,
+            b.total_passengers,
+            b.total_fare,
+            b.booking_status,
+
+            t.train_number,
+            t.train_name,
+            s.journey_date,
+
+            st1.station_name AS boarding_station,
+            st2.station_name AS destination_station,
+
+            p.transaction_reference,
+            p.payment_status,
+            ti.ticket_reference
+
+        FROM bookings b
+
+        JOIN schedules s
+            ON b.schedule_id = s.schedule_id
+
+        JOIN trains t
+            ON s.train_id = t.train_id
+
+        JOIN schedule_stops ss1
+            ON b.boarding_schedule_stop_id = ss1.schedule_stop_id
+
+        JOIN route_stops rs1
+            ON ss1.route_stop_id = rs1.route_stop_id
+
+        JOIN stations st1
+            ON rs1.station_id = st1.station_id
+
+        JOIN schedule_stops ss2
+            ON b.alighting_schedule_stop_id = ss2.schedule_stop_id
+
+        JOIN route_stops rs2
+            ON ss2.route_stop_id = rs2.route_stop_id
+
+        JOIN stations st2
+            ON rs2.station_id = st2.station_id
+
+        LEFT JOIN payments p
+            ON p.booking_id = b.booking_id
+
+        LEFT JOIN tickets ti
+            ON ti.booking_id = b.booking_id
+
+        WHERE b.booking_id = :booking_id
+          AND b.user_id = :user_id
+
+        LIMIT 1
+    """), {
+        "booking_id": booking_id,
+        "user_id": current_user.user_id
+    }).mappings().first()
+
+    if not booking or booking["payment_status"] != "SUCCESS":
+        abort(403)
+
+    passengers = db.session.execute(text("""
+        SELECT
+            bp.passenger_name,
+            bp.age,
+            bp.gender,
+            qt.token_reference
+        FROM booking_passengers bp
+        LEFT JOIN qr_tokens qt
+            ON qt.booking_passenger_id = bp.booking_passenger_id
+        WHERE bp.booking_id = :booking_id
+        ORDER BY bp.booking_passenger_id
+    """), {"booking_id": booking_id}).mappings().all()
+
+    output = io.BytesIO()
+    pdf = canvas.Canvas(output, pagesize=A4)
+    height = A4[1]
+    y = height - 60
+
+    def line(label, value):
+        nonlocal y
+        if y < 60:
+            pdf.showPage()
+            y = height - 60
+        pdf.setFont("Helvetica-Bold", 10)
+        pdf.drawString(55, y, f"{label}:")
+        pdf.setFont("Helvetica", 10)
+        pdf.drawString(160, y, str(value))
+        y -= 18
+
+    pdf.setFont("Helvetica-Bold", 18)
+    pdf.drawString(55, y, "RailSync - Booking Details")
+
+    first_token = next(
+        (passenger["token_reference"] for passenger in passengers if passenger["token_reference"]),
+        None,
+    )
+    if first_token:
+        pdf.drawImage(ImageReader(_qr_png(first_token)), 440, height - 180, 90, 90)
+        pdf.setFont("Helvetica", 8)
+        pdf.drawCentredString(485, height - 192, "Scan at gate")
+
+    y -= 34
+
+    for label, value in (
+        ("PNR", booking["pnr_number"]),
+        ("Train", f"{booking['train_number']} - {booking['train_name']}"),
+        ("Journey date", booking["journey_date"]),
+        ("From", booking["boarding_station"]),
+        ("To", booking["destination_station"]),
+        ("Passengers", booking["total_passengers"]),
+        ("Fare", f"INR {float(booking['total_fare']):.2f}"),
+        ("Payment", f"{booking['payment_status']} ({booking['transaction_reference']})"),
+        ("Ticket reference", booking["ticket_reference"]),
+        ("Booking status", booking["booking_status"]),
+        ("Booked at", booking["booking_date"]),
+    ):
+        line(label, value)
+
+    y -= 10
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.drawString(55, y, "Passengers")
+    y -= 22
+
+    for index, passenger in enumerate(passengers, 1):
+        line(
+            f"{index}. {passenger['passenger_name']}",
+            f"{passenger['age']} / {passenger['gender']} / {passenger['token_reference'] or '-'}",
+        )
+
+    pdf.save()
+    output.seek(0)
+
+    return send_file(
+        output,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"RailSync_{booking['pnr_number']}.pdf",
+    )
+
+
 # ==========================================
 # MY QR TICKET
 # ==========================================
@@ -570,46 +857,9 @@ def my_qr_ticket():
     if current_user.role != "PASSENGER":
         abort(403)
 
-    tickets = db.session.execute(text("""
-        SELECT
-            qt.token_reference,
-            qt.issued_at,
-            qt.expiry_time,
-            qt.token_status,
-            bp.passenger_name,
-            bp.age,
-            b.pnr_number,
-            b.booking_status,
-            t.train_number,
-            t.train_name,
-            s.journey_date
+    return redirect(url_for("passenger.my_bookings"))
 
-        FROM qr_tokens qt
 
-        JOIN booking_passengers bp
-            ON qt.booking_passenger_id = bp.booking_passenger_id
-
-        JOIN bookings b
-            ON bp.booking_id = b.booking_id
-
-        JOIN schedules s
-            ON b.schedule_id = s.schedule_id
-
-        JOIN trains t
-            ON s.train_id = t.train_id
-
-        WHERE b.user_id = :user_id
-
-        ORDER BY qt.issued_at DESC
-
-    """), {
-        "user_id": current_user.user_id
-    }).mappings().all()
-
-    return render_template(
-        "my_qr_ticket.html",
-        tickets=tickets
-    )
 @passenger_bp.route("/journey-history")
 @login_required
 def journey_history():

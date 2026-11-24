@@ -1,9 +1,7 @@
 from flask import Blueprint, render_template, abort, request, redirect, url_for, flash
-from sqlalchemy import text
-from flask import Blueprint, render_template, abort
 from flask_login import login_required, current_user
-from extensions import db
 from sqlalchemy import text
+from extensions import db
 
 admin = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -1591,7 +1589,7 @@ def update_complaint(complaint_id):
         UPDATE complaints
         SET complaint_status = :status,
             resolved_at = CASE
-                WHEN :status = 'RESOLVED' THEN NOW()
+                WHEN :status = 'RESOLVED' THEN CURRENT_TIMESTAMP
                 ELSE NULL
             END
         WHERE complaint_id = :complaint_id

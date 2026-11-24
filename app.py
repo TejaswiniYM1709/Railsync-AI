@@ -23,10 +23,6 @@ def create_app():
     app.register_blueprint(staff)
 
     with app.app_context():
-        with db.engine.connect() as connection:
-            result = connection.exec_driver_sql("SELECT DATABASE()")
-            print("Connected to database:", result.scalar())
-
         user_count = User.query.count()
         print("Total registered users:", user_count)
 

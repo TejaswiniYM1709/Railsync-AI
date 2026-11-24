@@ -229,6 +229,16 @@
         </div>
 
         <a class="dashboard-btn"
+           href="{{ url_for('passenger.my_bookings') }}">
+            View Booking & QR →
+        </a>
+
+        <a class="dashboard-btn"
+           href="{{ url_for('passenger.download_booking_pdf', booking_id=booking_id) }}">
+            Download PDF →
+        </a>
+
+        <a class="dashboard-btn"
            href="{{ url_for('passenger.dashboard') }}">
             Back to Passenger Dashboard →
         </a>
