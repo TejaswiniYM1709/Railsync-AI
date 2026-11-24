@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RailSync | UPI Payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f1f5f9; color: #142b45; }
+        header { background: #142b45; color: white; padding: 18px 7%; }
+        .box { max-width: 520px; margin: 45px auto; background: white; padding: 32px; border-radius: 12px; box-shadow: 0 4px 16px #d8dee6; text-align: center; }
+        h1 { color: #2878b5; margin-top: 0; }
+        .amount { font-size: 34px; font-weight: bold; margin: 10px 0; }
+        img { width: 230px; height: 230px; border: 1px solid #cbd5e1; padding: 8px; background: white; }
+        .detail { margin: 8px 0; }
+        .label { color: #64748b; font-size: 14px; }
+        button { width: 100%; margin-top: 22px; padding: 13px; background: #2878b5; color: white; border: 0; border-radius: 6px; font-size: 16px; cursor: pointer; }
+        a { color: #2878b5; display: inline-block; margin-top: 16px; }
+    </style>
+</head>
+<body>
+<header>🚆 RailSync | Secure Payment</header>
+<div class="box">
+    <h1>Pay with UPI</h1>
+    <p class="label">Scan this QR code in any UPI app</p>
+    <img src="{{ qr_data }}" alt="UPI payment QR code">
+    <div class="amount">₹ {{ "%.2f"|format(amount|float) }}</div>
+    <div class="detail"><strong>UPI ID:</strong> saralaya@upi</div>
+    <div class="detail"><strong>Transaction ref:</strong> {{ reference }}</div>
+
+    <form method="POST" action="{{ url_for('passenger.confirm_payment') }}">
+        <button type="submit">I have paid — continue →</button>
+    </form>
+    <a href="{{ url_for('passenger.book_ticket') }}">Cancel booking</a>
+</div>
+</body>
+</html>

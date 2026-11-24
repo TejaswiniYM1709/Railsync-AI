@@ -323,6 +323,10 @@
                     Login to RailSync →
                 </button>
 
+                <p style="text-align:center; margin-top:18px;">
+                    New here? <a href="{{ url_for('auth.register') }}">Create an account</a>
+                </p>
+
             </form>
 
             {% with messages = get_flashed_messages(with_categories=true) %}

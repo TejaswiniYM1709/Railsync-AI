@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Blueprint, render_template, abort, request, flash, redirect
 from flask_login import login_required, current_user
 from sqlalchemy import text
@@ -73,7 +75,7 @@ def verify_ticket():
                 SELECT
                     qt.token_id,
                     qt.token_status,
-                    (qt.expiry_time > CURRENT_TIMESTAMP) AS is_valid_time,
+                    (qt.expiry_time > :now) AS is_valid_time,
                     bp.passenger_name,
                     bp.passenger_status,
                     b.pnr_number,
@@ -85,7 +87,7 @@ def verify_ticket():
                     ON bp.booking_id = b.booking_id
                 WHERE qt.token_reference = :token
             """),
-            {"token": token}
+            {"token": token, "now": datetime.now()}
         ).mappings().first()
 
         if not result:
@@ -155,7 +157,7 @@ def passenger_entry():
                 SELECT
                     qt.token_id,
                     qt.token_status,
-                    (qt.expiry_time > CURRENT_TIMESTAMP) AS is_valid_time,
+                    (qt.expiry_time > :now) AS is_valid_time,
                     bp.passenger_status,
                     b.booking_status
                 FROM qr_tokens qt
@@ -165,7 +167,7 @@ def passenger_entry():
                     ON bp.booking_id = b.booking_id
                 WHERE qt.token_reference = :token
             """),
-            {"token": token}
+            {"token": token, "now": datetime.now()}
         ).mappings().first()
 
         if result:
@@ -258,7 +260,7 @@ def passenger_exit():
                 SELECT
                     qt.token_id,
                     qt.token_status,
-                    (qt.expiry_time > CURRENT_TIMESTAMP) AS is_valid_time,
+                    (qt.expiry_time > :now) AS is_valid_time,
                     bp.passenger_status,
                     b.booking_status
                 FROM qr_tokens qt
@@ -268,7 +270,7 @@ def passenger_exit():
                     ON bp.booking_id = b.booking_id
                 WHERE qt.token_reference = :token
             """),
-            {"token": token}
+            {"token": token, "now": datetime.now()}
         ).mappings().first()
 
         if result:
@@ -347,7 +349,7 @@ def platform_access():
                 SELECT
                     qt.token_id,
                     qt.token_status,
-                    (qt.expiry_time > CURRENT_TIMESTAMP) AS is_valid_time,
+                    (qt.expiry_time > :now) AS is_valid_time,
                     bp.passenger_status,
                     b.booking_status
                 FROM qr_tokens qt
@@ -357,7 +359,7 @@ def platform_access():
                     ON bp.booking_id = b.booking_id
                 WHERE qt.token_reference = :token
             """),
-            {"token": token}
+            {"token": token, "now": datetime.now()}
         ).mappings().first()
 
         platform_result = db.session.execute(
